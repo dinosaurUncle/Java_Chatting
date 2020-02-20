@@ -1,7 +1,6 @@
 package common;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -12,7 +11,7 @@ import java.util.Base64;
 
 public class IOStreamUtils {
     private Socket socket = null;
-    private static Logger logger = LogManager.getLogger(IOStreamUtils.class);
+    Logger logger =  new Log4jConfig(IOStreamUtils.class).getLogger();
     public IOStreamUtils(Socket socket){
         this.socket = socket;
     }
@@ -46,7 +45,7 @@ public class IOStreamUtils {
                 try (ObjectInputStream ois = new ObjectInputStream(bais)) {
                     JSONParser jsonParser = new JSONParser();
                     result = (JSONObject)jsonParser.parse(String.valueOf(ois.readObject()));
-                    System.out.println("inputStreamExecute: " + result);
+                    logger.info(result);
                 }
             }
         } catch (IOException e){
@@ -56,7 +55,7 @@ public class IOStreamUtils {
             logger.error(e.getMessage());
             e.printStackTrace();
         } catch (ParseException e) {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
             e.printStackTrace();
         }finally {
 
