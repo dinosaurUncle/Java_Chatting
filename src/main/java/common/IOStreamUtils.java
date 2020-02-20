@@ -1,8 +1,10 @@
 package common;
 
-import domain.Member;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,12 +17,13 @@ public class IOStreamUtils {
         this.socket = socket;
     }
 
-    public void outputStreamExecute(Object object){
+    public void outputStreamExecute(JSONObject jsonObject){
+        String serializeJsonObject = jsonObject.toJSONString();
         byte[] serializedObject;
         try {
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                 try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-                    oos.writeObject(object);
+                    oos.writeObject(serializeJsonObject);
 
                     serializedObject = baos.toByteArray();
                 }
@@ -33,15 +36,17 @@ public class IOStreamUtils {
         }
     }
 
-    public Object inputStreamExecute(){
-        Object result = null;
+    public JSONObject inputStreamExecute(){
+        JSONObject result = null;
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             String base64Member = objectInputStream.readObject().toString();
             byte[] inputSerialzedMember = Base64.getDecoder().decode(base64Member);
             try (ByteArrayInputStream bais = new ByteArrayInputStream(inputSerialzedMember)) {
                 try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-                    result = ois.readObject();
+                    JSONParser jsonParser = new JSONParser();
+                    result = (JSONObject)jsonParser.parse(String.valueOf(ois.readObject()));
+                    System.out.println("inputStreamExecute: " + result);
                 }
             }
         } catch (IOException e){
@@ -50,7 +55,10 @@ public class IOStreamUtils {
         } catch (ClassNotFoundException e){
             logger.error(e.getMessage());
             e.printStackTrace();
-        } finally {
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }finally {
 
         }
         return result;

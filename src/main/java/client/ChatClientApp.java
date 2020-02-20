@@ -1,9 +1,7 @@
 package client;
 
 import common.IOStreamUtils;
-import domain.Member;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,11 +16,14 @@ public class ChatClientApp {
         try {
             socket.connect(new InetSocketAddress(SERVER_IP, SERVER_PORT));
             IOStreamUtils ioStreamUtils = null;
-            Member member = new Member("아이유", "IU@naver.com", 26);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", "아이유");
+            jsonObject.put("email", "IU@naver.com");
+            jsonObject.put("age", "22");
             ioStreamUtils = new IOStreamUtils(socket);
-            ioStreamUtils.outputStreamExecute(member);
-            Member inputMember = (Member)ioStreamUtils.inputStreamExecute();
-            System.out.println(inputMember);
+            ioStreamUtils.outputStreamExecute(jsonObject);
+            JSONObject inputJsonObject = ioStreamUtils.inputStreamExecute();
+            System.out.println(inputJsonObject);
         } catch (IOException e){
 
         }

@@ -1,17 +1,12 @@
 package server;
 
 import common.IOStreamUtils;
-import domain.Member;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
+import org.json.simple.JSONObject;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class ChatServer {
     public static final int PORT = 5000;
@@ -20,9 +15,12 @@ public class ChatServer {
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         IOStreamUtils ioStreamUtils = null;
-        Member member = new Member("박종훈", "m05214@naver.com", 33);
-
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "박종훈");
+        jsonObject.put("email", "m05214");
+        jsonObject.put("age", "33");
         try {
+
             serverSocket = new ServerSocket();
             String hostAddress = InetAddress.getLocalHost().getHostAddress();
             System.out.println(hostAddress);
@@ -30,14 +28,14 @@ public class ChatServer {
             System.out.println("연결 기다림: " + hostAddress + " : " + PORT);
             Socket socket = serverSocket.accept();
             ioStreamUtils = new IOStreamUtils(socket);
-            Member inputMember = (Member)ioStreamUtils.inputStreamExecute();
-            System.out.println(inputMember);
-            ioStreamUtils.outputStreamExecute(member);
+            JSONObject inputJsonObject = ioStreamUtils.inputStreamExecute();
+            System.out.println(inputJsonObject);
+            ioStreamUtils.outputStreamExecute(jsonObject);
 
         } catch (IOException e){
             System.out.println(e.getMessage());
             e.printStackTrace();
-        } finally {
+        }finally {
             try {
                 if (serverSocket != null && !serverSocket.isClosed()){
                     serverSocket.close();
