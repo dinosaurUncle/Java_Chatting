@@ -1,7 +1,4 @@
-package server;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+package me.dinosauruncle.server;
 
 
 import java.io.*;
@@ -15,7 +12,6 @@ public class ChatServerProcessThread extends Thread {
     private String nickname = null;
     private Socket socket = null;
     List<PrintWriter> listWriters = null;
-    private static Logger logger = LogManager.getRootLogger();
 
     ChatServerProcessThread(Socket socket, List<PrintWriter> listWriters){
         this.socket = socket;
@@ -32,14 +28,14 @@ public class ChatServerProcessThread extends Thread {
                 String request = bufferedReader.readLine();
 
                 if (request == null){
-                    logger.info("클라이언트로부터 연결 끊김");
+                    //logger.info("클라이언트로부터 연결 끊김");
 
                     break;
                 }
             }
         }catch (IOException e) {
-            logger.info(this.nickname + "님이 채팅방을 나갔습니다");
-            logger.error(e.getMessage());
+            //logger.info(this.nickname + "님이 채팅방을 나갔습니다");
+            //logger.error(e.getMessage());
         }
     }
 

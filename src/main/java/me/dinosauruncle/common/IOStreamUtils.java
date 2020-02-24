@@ -1,18 +1,20 @@
-package common;
+package me.dinosauruncle.common;
 
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Base64;
 
+@Component
 public class IOStreamUtils {
     private Socket socket = null;
-    Logger logger =  new Log4jConfig(IOStreamUtils.class).getLogger();
-    public IOStreamUtils(Socket socket){
+    public void setSocket(Socket socket) {
         this.socket = socket;
     }
 
@@ -31,7 +33,7 @@ public class IOStreamUtils {
             objectOutputStream.writeObject(Base64.getEncoder().encodeToString(serializedObject));
         } catch (IOException e) {
             e.printStackTrace();
-            logger.error(e.getMessage());
+            //logger.error(e.getMessage());
         }
     }
 
@@ -45,17 +47,17 @@ public class IOStreamUtils {
                 try (ObjectInputStream ois = new ObjectInputStream(bais)) {
                     JSONParser jsonParser = new JSONParser();
                     result = (JSONObject)jsonParser.parse(String.valueOf(ois.readObject()));
-                    logger.info(result);
+                    //logger.info(result);
                 }
             }
         } catch (IOException e){
-            logger.error(e.getMessage());
+            //logger.error(e.getMessage());
             e.printStackTrace();
         } catch (ClassNotFoundException e){
-            logger.error(e.getMessage());
+            //logger.error(e.getMessage());
             e.printStackTrace();
         } catch (ParseException e) {
-            logger.error(e.getMessage());
+            //logger.error(e.getMessage());
             e.printStackTrace();
         }finally {
 
