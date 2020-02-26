@@ -12,44 +12,53 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class RequestAccepter {
     private static final Logger logger = LogManager.getLogger(RequestAccepter.class);
 
+    @Autowired
+    ServerProcessThread serverProcessThread;
 
-    @Value("${server.ip}")
+    @Value("${self.server.ip}")
     String ip;
 
-    @Value("${server.port}")
+    @Value("${self.server.port}")
     int port;
 
+    Map<String, Socket> sockerMap;
+
     public void execute(){
+        sockerMap = new HashMap<String, Socket>();
         ServerSocket serverSocket = null;
         InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, port);
-        while(true){
+
             try {
                 serverSocket = new ServerSocket();
                 String hostAddress = InetAddress.getLocalHost().getHostAddress();
 
                 try {
-                    logger.info(serverSocket.isClosed());
+                    logger.info(serverSocket.isBound());
                     serverSocket.bind(inetSocketAddress);
 
                 }catch (BindException e){
+
                     logger.error(e.getMessage());
                     serverSocket.close();
-                    continue;
                 }
-                logger.info(hostAddress);
 
-                logger.info("연결 기다림: " + hostAddress + " : " + port);
-                Socket socket = serverSocket.accept();
-                new ServerProcessThread(socket).start();
+                while(true){
+                    logger.info("접속된 소켓리스트: " + sockerMap);
+                    logger.info(hostAddress);
+                    logger.info("연결 기다림: " + hostAddress + " : " + port);
+                    Socket socket = serverSocket.accept();
+                    serverProcessThread.run(socket, sockerMap);
+                }
             } catch (IOException e){
                 logger.error(e.getMessage());
                 e.printStackTrace();
             }
-        }
     }
 }
