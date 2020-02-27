@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.net.Socket;
 import java.util.Base64;
+import java.util.Set;
 
 @Component
 public class IOStreamUtils {
@@ -63,5 +64,14 @@ public class IOStreamUtils {
 
         }
         return result;
+    }
+
+    public String getKey(JSONObject jsonObject){
+        Set<String> keySet = jsonObject.keySet();
+        String key = "";
+        for (String eachKey : keySet){
+            key = eachKey;
+        }
+        return key;
     }
 }

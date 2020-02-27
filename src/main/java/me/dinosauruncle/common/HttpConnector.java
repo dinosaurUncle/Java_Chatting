@@ -1,6 +1,10 @@
 package me.dinosauruncle.common;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,42 +15,40 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 @Component
 public class HttpConnector {
-
+    private static final Logger logger = LogManager.getLogger(HttpConnector.class);
     @Value("${account.server.ip}")
     String ip;
 
     @Value("${account.server.port}")
     int port;
 
-    public String get(String input){
-        return null;
-    }
-
-    public String post(String addDomain, String jsonMessage){
+    public String restApiCall(String method, String addDomain, String jsonMessage,
+                              boolean setOutput){
         String result = "";
         try {
-            URL url = new URL("http://"+ip+":"+String.valueOf(port) + "/account"+addDomain);
+            logger.info("http://"+ip+":"+String.valueOf(port) + "/account/"+addDomain);
+            URL url = new URL("http://"+ip+":"+String.valueOf(port) + "/account/"+addDomain);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setConnectTimeout(5000);
             con.setReadTimeout(5000);
-            con.setRequestMethod("POST");
+            con.setRequestMethod(method);
             con.setRequestProperty("Content-Type", "application/json");
             con.setDoInput(true);
-            con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
+            con.setDoOutput(setOutput); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
             con.setUseCaches(false);
             con.setDefaultUseCaches(false);
 
-            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-            wr.write(jsonMessage); //json 형식의 message 전달
-            wr.flush();
+            if (setOutput){
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(jsonMessage); //json 형식의 message 전달
+                wr.flush();
+            }
 
             StringBuilder sb = new StringBuilder();
             if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                //Stream을 처리해줘야 하는 귀찮음이 있음.
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), "utf-8"));
                 String line;
@@ -66,6 +68,19 @@ public class HttpConnector {
             e.printStackTrace();
         }
 
+        return result;
+    }
+
+    public String jsonExtractionKey(String jsonData, String id){
+        String result = null;
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject;
+        try {
+            jsonObject = (JSONObject) jsonParser.parse(jsonData);
+            result = String.valueOf(jsonObject.get(id));
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
         return result;
     }
 }

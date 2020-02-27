@@ -45,8 +45,9 @@ public class ServerProcessThread {
         ioStreamUtils.setSocket(socket);
         JSONObject inputJsonObject = ioStreamUtils.inputStreamExecute();
         logger.info(inputJsonObject);
-        serverController.classification(inputJsonObject, map);
-        resultDelivery.resultDeliery(map, ioStreamUtils, socket, sockerMap);
+        String apiKey = ioStreamUtils.getKey(inputJsonObject);
+        serverController.classification(apiKey, inputJsonObject, map);
+        resultDelivery.resultDeliery(apiKey, map, ioStreamUtils, socket, sockerMap);
     }
 
 

@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -17,60 +18,95 @@ import java.util.Map;
 public class ResultDelivery {
     private static final Logger logger = LogManager.getLogger(ResultDelivery.class);
 
-    public void resultDeliery(Map<String, String> map, IOStreamUtils ioStreamUtils,
+    public void resultDeliery(String key, Map<String, String> map, IOStreamUtils ioStreamUtils,
                               Socket socket, Map<String, Socket> sockerMap){
-        String type = map.get("type");
-        String loginResult = map.get("result");
+
+        String result = map.get("result");
+
         JSONParser jsonParser = new JSONParser();
         JSONObject resultJsonObject = null;
-        switch (type){
+        try {
+
+            if (StringUtils.isEmpty(result)) throw new NullPointerException();
+
+                resultJsonObject = (JSONObject) jsonParser.parse(result);
+        switch (key) {
             case "login":
-                try {
-                    resultJsonObject = (JSONObject) jsonParser.parse(loginResult);
-                    String loginState = resultJsonObject.get("login").toString();
-                    if (loginState.equals("false")) {
-                        String errorMessage =String.valueOf(resultJsonObject.get("message"));
-                        logger.error(errorMessage);
-                        JSONObject errorJsonObject = new JSONObject();
-                        errorJsonObject.put("message", errorMessage);
-                        ioStreamUtils.outputStreamExecute(errorJsonObject);
-                        socket.close();
-                        break;
-                    }
-                    JSONObject innerJsonObject = (JSONObject) resultJsonObject.get("account");
-
-                    String loginId = innerJsonObject.get("id").toString();
-                    if (loginState.equals("true")){
-                        logger.info("로그인 성공");
-                        sockerMap.put(loginId, socket);
-                        ioStreamUtils.outputStreamExecute(resultJsonObject);
-                    } else {
-                        logger.info("로그인 실패");
-                        ioStreamUtils.outputStreamExecute(resultJsonObject);
-                        socket.close();
-                    }
-
-                } catch (IOException e){
-                    String errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
-                    logger.error(e.getMessage());
+                String loginState = resultJsonObject.get(key).toString();
+                if (loginState.equals("false")) {
+                    String errorMessage = String.valueOf(resultJsonObject.get("message"));
+                    logger.error(errorMessage);
                     JSONObject errorJsonObject = new JSONObject();
                     errorJsonObject.put("message", errorMessage);
                     ioStreamUtils.outputStreamExecute(errorJsonObject);
-
-                } catch (ParseException e){
-                    String errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
-                    JSONObject errorJsonObject = new JSONObject();
-                    errorJsonObject.put("message", errorMessage);
-                    ioStreamUtils.outputStreamExecute(errorJsonObject);
-                    logger.error(errorMessage + e.getMessage());
-                } catch (RuntimeException e) {
-
+                    socket.close();
+                    break;
                 }
+                JSONObject innerJsonObject = (JSONObject) resultJsonObject.get("account");
+
+                String loginId = innerJsonObject.get("id").toString();
+                if (loginState.equals("true")) {
+                    logger.info("로그인 성공");
+                    sockerMap.put(loginId, socket);
+                    ioStreamUtils.outputStreamExecute(resultJsonObject);
+                } else {
+                    logger.info("로그인 실패");
+                    ioStreamUtils.outputStreamExecute(resultJsonObject);
+                    socket.close();
+                }
+
+
+                break;
+            case "checkId":
+                resultJsonObject.clear();
+                resultJsonObject.put("message", "이미 존재하는 아이디 입니다");
+                resultJsonObject.put("isUse", false);
+                ioStreamUtils.outputStreamExecute(resultJsonObject);
+                socket.close();
                 break;
             default:
                 break;
-        }
+            }
+        } catch (IOException e){
+            String errorMessage = "";
+            switch (key) {
+                case "login":
+                    errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    break;
+            }
 
+            logger.error(e.getMessage());
+            JSONObject errorJsonObject = new JSONObject();
+            errorJsonObject.put("message", errorMessage);
+            ioStreamUtils.outputStreamExecute(errorJsonObject);
+
+        } catch (ParseException e){
+            String errorMessage = "";
+            switch (key) {
+                case "login":
+                    errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    break;
+            }
+
+            logger.error(e.getMessage());
+            JSONObject errorJsonObject = new JSONObject();
+            errorJsonObject.put("message", errorMessage);
+            ioStreamUtils.outputStreamExecute(errorJsonObject);
+        } catch (NullPointerException e) {
+            String message = "";
+            switch (key) {
+                case "login":
+                    message = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    break;
+                case "checkId" :
+                    message = "사용 가능한 아이디 입니다.";
+            }
+            JSONObject errorJsonObject = new JSONObject();
+            if (key.equals("checkId")) errorJsonObject.put("isUse", true);
+
+            errorJsonObject.put("message", message);
+            ioStreamUtils.outputStreamExecute(errorJsonObject);
+        }
 
     }
 }
