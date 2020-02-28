@@ -64,6 +64,12 @@ public class ResultDelivery {
                 ioStreamUtils.outputStreamExecute(resultJsonObject);
                 socket.close();
                 break;
+            case "signup":
+                JSONObject accountJsonObject = (JSONObject) resultJsonObject.get("account");
+                resultJsonObject.put("message", "id: " +accountJsonObject.get("id") + " 회원 가입 되었습니다");
+                ioStreamUtils.outputStreamExecute(resultJsonObject);
+                socket.close();
+                break;
             default:
                 break;
             }

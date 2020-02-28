@@ -32,6 +32,11 @@ public class ServerController{
                         httpConnector.jsonExtractionKey(innerJsonObject.toJSONString(), "id"),
                         innerJsonObject.toJSONString(),
                         false);
+                break;
+            case "signup" :
+                result = httpConnector.restApiCall("POST","", innerJsonObject.toJSONString(),
+                        true);
+                break;
             default:
                 break;
         }
