@@ -46,10 +46,13 @@ public class ResultDelivery {
 
                 String loginId = innerJsonObject.get("id").toString();
                 if (loginState.equals("true")) {
+                    resultJsonObject.put("connecting", "true");
+                    resultJsonObject.put("message", "로그인 되었습니다");
                     logger.info("로그인 성공");
                     sockerMap.put(loginId, socket);
                     ioStreamUtils.outputStreamExecute(resultJsonObject);
                 } else {
+                    innerJsonObject.put("message", "계정 또는 비밀번호를 다시 입력해주세요");
                     logger.info("로그인 실패");
                     ioStreamUtils.outputStreamExecute(resultJsonObject);
                     socket.close();
@@ -77,7 +80,7 @@ public class ResultDelivery {
             String errorMessage = "";
             switch (key) {
                 case "login":
-                    errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    errorMessage = "계정 또는 비밀번호를 다시 입력해주세요";
                     break;
             }
 
@@ -90,7 +93,7 @@ public class ResultDelivery {
             String errorMessage = "";
             switch (key) {
                 case "login":
-                    errorMessage = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    errorMessage = "계정 또는 비밀번호를 다시 입력해주세요";
                     break;
             }
 
@@ -102,7 +105,7 @@ public class ResultDelivery {
             String message = "";
             switch (key) {
                 case "login":
-                    message = "로그인 실패 하였습니다. 아이디와 비밀번호를 확인해주세요";
+                    message = "계정 또는 비밀번호를 다시 입력해주세요";
                     break;
                 case "checkId" :
                     message = "사용 가능한 아이디 입니다.";
