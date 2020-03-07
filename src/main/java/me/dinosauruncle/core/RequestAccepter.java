@@ -28,7 +28,7 @@ public class RequestAccepter {
     @Value("${self.server.port}")
     int port;
 
-    Map<String, Socket> sockerMap;
+    public Map<String, Socket> sockerMap;
 
     public void execute(){
         sockerMap = new HashMap<String, Socket>();

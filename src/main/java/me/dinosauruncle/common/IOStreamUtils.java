@@ -1,10 +1,10 @@
 package me.dinosauruncle.common;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -14,6 +14,7 @@ import java.util.Set;
 
 @Component
 public class IOStreamUtils {
+    private static final Logger logger = LogManager.getLogger(IOStreamUtils.class);
     private Socket socket = null;
     public void setSocket(Socket socket) {
         this.socket = socket;
@@ -53,14 +54,14 @@ public class IOStreamUtils {
             }
         } catch (IOException e){
             //logger.error(e.getMessage());
-            e.printStackTrace();
+            logger.info("로그아웃");
         } catch (ClassNotFoundException e){
             //logger.error(e.getMessage());
             e.printStackTrace();
         } catch (ParseException e) {
             //logger.error(e.getMessage());
             e.printStackTrace();
-        }finally {
+        } finally {
 
         }
         return result;

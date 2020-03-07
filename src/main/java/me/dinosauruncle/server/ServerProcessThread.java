@@ -43,11 +43,14 @@ public class ServerProcessThread {
     public void run(Socket socket, Map<String, Socket> sockerMap) {
         map = new HashMap<String, String>();
         ioStreamUtils.setSocket(socket);
-        JSONObject inputJsonObject = ioStreamUtils.inputStreamExecute();
-        logger.info(inputJsonObject);
-        String apiKey = ioStreamUtils.getKey(inputJsonObject);
-        serverController.classification(apiKey, inputJsonObject, map);
-        resultDelivery.resultDeliery(apiKey, map, ioStreamUtils, socket, sockerMap);
+        while(!socket.isClosed()){
+            logger.info("연결되어 있는 소켓: " + sockerMap);
+            JSONObject inputJsonObject = ioStreamUtils.inputStreamExecute();
+            logger.info(inputJsonObject);
+            String apiKey = ioStreamUtils.getKey(inputJsonObject);
+            serverController.classification(apiKey, inputJsonObject, map);
+            resultDelivery.resultDeliery(apiKey, map, ioStreamUtils, socket, sockerMap);
+        }
     }
 
 
